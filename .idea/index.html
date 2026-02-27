@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Dog API & Picnic Button</title>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/picnic">
+
+    <style>
+        .flex.demo {
+            margin: .2em 0;
+            background: #2ecc40;
+            text-align: center;
+        }
+
+        .flex.demo div {
+            border: .1em solid pink;
+        }
+
+    </style>
+</head>
+<body>
+
+<button id="api-dog">Dog</button>
+
+<button id="votar">Votar</button>
+
+<div id="imagen"></div>
+
+<script>
+
+    let imagen;
+
+    document.addEventListener("DOMContentLoaded", function () {
+        imagen = document.getElementById("imagen");
+        document.getElementById("api-dog").addEventListener("click", irPorAlgo);
+        document.getElementById("votar").addEventListener("click", votar);
+    });
+
+    let idPerro = "";
+
+    async function irPorAlgo() {
+        try {
+            const respuesta = await fetch("https://api.thedogapi.com/v1/images/search?limit=1", {
+                method: "GET",
+                headers: {
+                    "x-api-key": ""
+                }
+            });
+            if (!respuesta.ok) {
+                console.log("Error");
+                //throw new Error("Error");
+            }
+            const data = await respuesta.json();
+            console.log(data);
+            const imagenPerro= document.createElement('img');
+            imagenPerro.setAttribute('src', data[0].url);
+            imagen.innerHTML = "";
+            imagen.appendChild(imagenPerro);
+            idPerro = data[0].id;
+        } catch (error) {
+            console.error("Error:", error.message);
+        }
+    }
+
+    async function votar() {
+        try {
+            const respuesta = await fetch("https://api.thedogapi.com/v1/votes",
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-api-key': ''
+                    },
+                    body: JSON.stringify({
+                        image_id: idPerro,
+                        value: 1
+                    })
+                });
+            if (!respuesta.ok) {
+                console.log("Error");
+                //throw new Error("Error de algo");
+            }
+            const data = await respuesta.json();
+            console.log(data);
+        } catch (error) {
+            console.error("Error:", error.message);
+        }
+    }
+
+</script>
+</body>
+</html>
